@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{% if editing %}Edit{% else %}New{% endif %} Product — Forge Commerce{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>{% if editing %}Edit Product{% else %}New Product{% endif %}</h1>
+</div>
+
+<div class="admin-nav">
+    <a href="/admin" class="btn">Dashboard</a>
+    <a href="/admin/products" class="btn">Products</a>
+    <a href="/admin/orders" class="btn">Orders</a>
+</div>
+
+<div class="checkout-form">
+    <form method="POST"
+          action="{% if editing %}/admin/products/{{ product.id }}{% else %}/admin/products/new{% endif %}"
+          enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">Product Name</label>
+            <input type="text" id="name" name="name" value="{% if product %}{{ product.name }}{% endif %}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4" required>{% if product %}{{ product.description }}{% endif %}</textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="text" id="price" name="price" value="{% if product %}{{ product.price }}{% endif %}" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" value="{% if product %}{{ product.category }}{% endif %}" required list="categories-list">
+                <datalist id="categories-list">
+                    {% for cat in categories %}
+                    <option value="{{ cat.name }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="image">Image</label>
+            <input type="file" id="image" name="image" accept="image/*">
+            {% if product %}
+            <small>Current: {{ product.image_url }}</small>
+            {% endif %}
+        </div>
+        <div class="form-group form-check">
+            <label>
+                <input type="checkbox" name="featured" value="on" {% if product and product.featured %}checked{% endif %}>
+                Featured product
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary">{% if editing %}Update{% else %}Create{% endif %} Product</button>
+        <a href="/admin/products" class="btn">Cancel</a>
+    </form>
+</div>
+{% endblock %}

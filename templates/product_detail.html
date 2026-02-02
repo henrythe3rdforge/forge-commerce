@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — Forge Commerce{% endblock %}
+{% block content %}
+<div class="product-detail">
+    <div class="product-detail-image">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+    </div>
+    <div class="product-detail-info">
+        <span class="product-category">{{ product.category }}</span>
+        <h1>{{ product.name }}</h1>
+        <p class="product-detail-price">${{ product.price | round(precision=2) }}</p>
+        <p class="product-detail-desc">{{ product.description }}</p>
+        <div class="product-detail-actions">
+            <button class="btn btn-primary btn-lg"
+                hx-post="/api/cart/add"
+                hx-vals='{"product_id":"{{ product.id }}","quantity":"1"}'
+                hx-target="#cart-count"
+                hx-swap="innerHTML">
+                Add to Cart
+            </button>
+        </div>
+    </div>
+</div>
+
+{% if related_products | length > 0 %}
+<section class="section">
+    <h2 class="section-title">Related Products</h2>
+    <div class="product-grid">
+        {% for p in related_products %}
+        <div class="product-card">
+            <a href="/products/{{ p.id }}">
+                <div class="product-image">
+                    <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy">
+                </div>
+                <div class="product-info">
+                    <span class="product-category">{{ p.category }}</span>
+                    <h3>{{ p.name }}</h3>
+                    <p class="product-price">${{ p.price | round(precision=2) }}</p>
+                </div>
+            </a>
+            <button class="btn btn-primary btn-add-cart"
+                hx-post="/api/cart/add"
+                hx-vals='{"product_id":"{{ p.id }}","quantity":"1"}'
+                hx-target="#cart-count"
+                hx-swap="innerHTML">
+                Add to Cart
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

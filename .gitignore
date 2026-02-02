@@ -1,0 +1,9 @@
+/target
+*.db
+*.db-wal
+*.db-shm
+.forge-commerce.pid
+static/js/htmx.min.js
+static/images/*.jpg
+static/images/*.png
+!static/images/placeholder.svg
