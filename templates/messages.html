@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Messages — Forge Market{% endblock %}
+{% block content %}
+<div class="messages-page">
+    <h1>Messages</h1>
+
+    {% if conversations | length == 0 %}
+    <div class="empty-state">
+        <p>No conversations yet.</p>
+        <p>Browse the <a href="/">marketplace</a> and message a seller to get started.</p>
+    </div>
+    {% else %}
+    <div class="conversation-list">
+        {% for c in conversations %}
+        <a href="/messages/{{ c.id }}" class="convo-card {% if c.unread_count > 0 %}unread{% endif %}">
+            <img src="{{ c.listing_image }}" alt="{{ c.listing_title }}" class="convo-thumb">
+            <div class="convo-details">
+                <div class="convo-header">
+                    <h3>{% if user.id == c.buyer_id %}{{ c.seller_name }}{% else %}{{ c.buyer_name }}{% endif %}</h3>
+                    {% if c.unread_count > 0 %}<span class="badge">{{ c.unread_count }}</span>{% endif %}
+                </div>
+                <p class="convo-listing">{{ c.listing_title }}</p>
+                <p class="convo-preview">{{ c.last_message | truncate(length=80) }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

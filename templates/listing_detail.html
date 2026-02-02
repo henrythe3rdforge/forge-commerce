@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} — Forge Market{% endblock %}
+{% block content %}
+<div class="detail-page">
+    <div class="detail-image">
+        <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+        {% if listing.status == "sold" %}
+        <div class="sold-overlay">SOLD</div>
+        {% endif %}
+    </div>
+
+    <div class="detail-content">
+        <div class="detail-header">
+            <span class="condition-tag tag-{{ listing.condition | lower | replace(from=' ', to='-') }}">{{ listing.condition }}</span>
+            <span class="detail-category">{{ listing.category }}</span>
+        </div>
+
+        <h1 class="detail-title">{{ listing.title }}</h1>
+        <p class="detail-price">${{ listing.price | round(precision=2) }}</p>
+
+        <div class="detail-meta">
+            <span>📍 {{ listing.location }}</span>
+            <span>Listed {{ time_ago }}</span>
+        </div>
+
+        <div class="detail-description">
+            <h3>Description</h3>
+            <p>{{ listing.description }}</p>
+        </div>
+
+        {% if listing.status == "active" %}
+        <div class="detail-actions">
+            {% if is_owner %}
+                <a href="/listing/{{ listing.id }}/edit" class="btn btn-secondary btn-block">Edit Listing</a>
+                <form method="post" action="/listing/{{ listing.id }}/sold">
+                    <button type="submit" class="btn btn-success btn-block">Mark as Sold</button>
+                </form>
+                <form method="post" action="/listing/{{ listing.id }}/delete" onsubmit="return confirm('Delete this listing?')">
+                    <button type="submit" class="btn btn-danger btn-block">Delete</button>
+                </form>
+            {% elif user %}
+                {% if existing_convo %}
+                    <a href="/messages/{{ existing_convo.id }}" class="btn btn-primary btn-block btn-lg">Continue Conversation</a>
+                {% else %}
+                    <a href="/listing/{{ listing.id }}/contact" class="btn btn-primary btn-block btn-lg">Message Seller</a>
+                {% endif %}
+            {% else %}
+                <a href="/login" class="btn btn-primary btn-block btn-lg">Log in to Message Seller</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="seller-card">
+            <div class="seller-info">
+                <div class="seller-avatar">{{ seller.name | truncate(length=1, end="") }}</div>
+                <div>
+                    <h4>{{ seller.name }}</h4>
+                    {% if seller.location %}<p class="seller-location">📍 {{ seller.location }}</p>{% endif %}
+                    {% if seller.bio %}<p class="seller-bio">{{ seller.bio }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if seller_listings | length > 0 %}
+        <div class="more-from-seller">
+            <h3>More from {{ seller.name }}</h3>
+            <div class="mini-grid">
+                {% for l in seller_listings %}
+                <a href="/listing/{{ l.id }}" class="mini-card">
+                    <img src="{{ l.image_url }}" alt="{{ l.title }}">
+                    <div class="mini-info">
+                        <p class="mini-price">${{ l.price | round(precision=0) }}</p>
+                        <p class="mini-title">{{ l.title }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

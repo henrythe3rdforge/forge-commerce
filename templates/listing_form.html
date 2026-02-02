@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{% if editing %}Edit Listing{% else %}Sell Something{% endif %} — Forge Market{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <h1>{% if editing %}Edit Listing{% else %}What are you selling?{% endif %}</h1>
+
+        {% if error and error != "" %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data"
+              action="{% if editing %}/listing/{{ listing.id }}/edit{% else %}/sell{% endif %}">
+
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" placeholder="What are you selling?"
+                       value="{% if listing %}{{ listing.title }}{% endif %}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price ($)</label>
+                <input type="number" id="price" name="price" step="0.01" min="0" placeholder="0.00"
+                       value="{% if listing %}{{ listing.price }}{% endif %}" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select category</option>
+                        {% set cats = ["Home & Kitchen", "Tools", "Apparel", "Furniture", "Lighting", "Stationery", "Electronics", "Books", "Sports", "Other"] %}
+                        {% for c in cats %}
+                        <option value="{{ c }}" {% if listing and listing.category == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="condition">Condition</label>
+                    <select id="condition" name="condition" required>
+                        {% set conditions = ["New", "Like New", "Good", "Fair"] %}
+                        {% for c in conditions %}
+                        <option value="{{ c }}" {% if listing and listing.condition == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" placeholder="City, State"
+                       value="{% if listing %}{{ listing.location }}{% elif user %}{{ user.location }}{% endif %}">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="5" placeholder="Describe your item — condition, size, why you're selling..."
+                          required>{% if listing %}{{ listing.description }}{% endif %}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="image">Photo</label>
+                <input type="file" id="image" name="image" accept="image/*">
+                {% if listing and listing.image_url != "/static/images/placeholder.svg" %}
+                <p class="form-hint">Current image will be kept if no new photo is uploaded.</p>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                {% if editing %}Save Changes{% else %}List for Sale{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

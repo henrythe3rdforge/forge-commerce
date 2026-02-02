@@ -1,57 +1,80 @@
 {% extends "base.html" %}
-{% block title %}Profile — Forge Commerce{% endblock %}
+{% block title %}Profile — Forge Market{% endblock %}
 {% block content %}
-<div class="page-header">
-    <h1>My Account</h1>
-</div>
-
-<div class="profile-layout">
-    <section class="profile-section">
-        <h2>Account Details</h2>
-        {% if user %}
-        <p><strong>Name:</strong> {{ user.name }}</p>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Member since:</strong> {{ user.created_at }}</p>
-        {% endif %}
-    </section>
-
-    <section class="profile-section">
-        <h2>Order History</h2>
-        {% if orders | length == 0 %}
-        <p>No orders yet. <a href="/products">Start shopping</a></p>
-        {% else %}
-        <div class="orders-list">
-            {% for order in orders %}
-            <div class="order-card">
-                <div class="order-header">
-                    <span class="order-id">{{ order.id | truncate(length=8, end="") }}</span>
-                    <span class="order-status status-{{ order.status }}">{{ order.status }}</span>
-                </div>
-                <div class="order-details">
-                    <span>${{ order.total | round(precision=2) }}</span>
-                    <span>{{ order.created_at }}</span>
-                </div>
-                <div class="order-shipping">
-                    <small>{{ order.shipping_name }} — {{ order.shipping_city }}, {{ order.shipping_zip }}</small>
-                </div>
+<div class="profile-page">
+    <div class="profile-grid">
+        <div class="profile-sidebar">
+            <div class="profile-card">
+                <div class="profile-avatar">{{ user.name | truncate(length=1, end="") }}</div>
+                <h2>{{ user.name }}</h2>
+                {% if user.location %}<p class="profile-location">📍 {{ user.location }}</p>{% endif %}
+                {% if user.bio %}<p class="profile-bio">{{ user.bio }}</p>{% endif %}
+                <p class="profile-joined">Member since {{ user.created_at | truncate(length=10, end="") }}</p>
             </div>
-            {% endfor %}
+
+            <div class="profile-section">
+                <h3>Edit Profile</h3>
+                {% if error and error != "" %}
+                <div class="alert alert-error">{{ error }}</div>
+                {% endif %}
+                {% if success and success != "" %}
+                <div class="alert alert-success">{{ success }}</div>
+                {% endif %}
+                <form method="post" action="/profile">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" value="{{ user.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" value="{{ user.location }}" placeholder="City, State">
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
+                        <textarea id="bio" name="bio" rows="3" placeholder="Tell people about yourself">{{ user.bio }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment_info">Payment Info</label>
+                        <input type="text" id="payment_info" name="payment_info" value="{{ user.payment_info }}"
+                               placeholder="Venmo: @you, PayPal: you@email.com, etc.">
+                        <p class="form-hint">Shared with buyers only after you accept their offer.</p>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Save</button>
+                </form>
+            </div>
         </div>
-        {% endif %}
-    </section>
 
-    <section class="profile-section">
-        <h2>Saved Addresses</h2>
-        {% if addresses | length == 0 %}
-        <p>No saved addresses yet.</p>
-        {% else %}
-            {% for addr in addresses %}
-            <div class="address-card">
-                <p><strong>{{ addr.name }}</strong></p>
-                <p>{{ addr.address }}<br>{{ addr.city }} {{ addr.zip }}</p>
+        <div class="profile-main">
+            <div class="profile-section">
+                <div class="section-header">
+                    <h3>Your Listings</h3>
+                    <a href="/sell" class="btn btn-primary btn-sm">+ New Listing</a>
+                </div>
+
+                {% if listings | length == 0 %}
+                <div class="empty-state">
+                    <p>You haven't listed anything yet.</p>
+                </div>
+                {% else %}
+                <div class="listing-grid compact">
+                    {% for l in listings %}
+                    <a href="/listing/{{ l.id }}" class="listing-card {% if l.status == 'sold' %}sold{% endif %}">
+                        <div class="listing-image">
+                            <img src="{{ l.image_url }}" alt="{{ l.title }}" loading="lazy">
+                            {% if l.status == "sold" %}<span class="sold-badge">SOLD</span>{% endif %}
+                            <span class="condition-tag tag-{{ l.condition | lower | replace(from=' ', to='-') }}">{{ l.condition }}</span>
+                        </div>
+                        <div class="listing-info">
+                            <p class="listing-price">${{ l.price | round(precision=0) }}</p>
+                            <h3 class="listing-title">{{ l.title }}</h3>
+                            <span class="listing-location">📍 {{ l.location }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
-            {% endfor %}
-        {% endif %}
-    </section>
+        </div>
+    </div>
 </div>
 {% endblock %}

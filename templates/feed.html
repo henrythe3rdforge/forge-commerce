@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Forge Market — Buy & Sell Locally{% endblock %}
+{% block content %}
+<div class="marketplace">
+    <aside class="sidebar">
+        <h2 class="sidebar-title">Marketplace</h2>
+        <a href="/search" class="filter-chip {% if current_category == '' %}active{% endif %}"
+           hx-get="/search" hx-target="#listing-grid" hx-include="[name='q'],[name='sort']">
+            All Categories
+        </a>
+        {% for cat in categories %}
+        <a href="/search?category={{ cat.name | urlencode }}" class="filter-chip {% if current_category == cat.name %}active{% endif %}"
+           hx-get="/search?category={{ cat.name | urlencode }}" hx-target="#listing-grid" hx-include="[name='q'],[name='sort']">
+            {{ cat.name }} <span class="chip-count">{{ cat.count }}</span>
+        </a>
+        {% endfor %}
+
+        <h3 class="sidebar-subtitle">Condition</h3>
+        <a href="#" class="filter-chip {% if current_condition == '' %}active{% endif %}"
+           hx-get="/search" hx-target="#listing-grid" hx-include="[name='q'],[name='category'],[name='sort']">Any</a>
+        <a href="#" class="filter-chip {% if current_condition == 'New' %}active{% endif %}"
+           hx-get="/search?condition=New" hx-target="#listing-grid" hx-include="[name='q'],[name='category'],[name='sort']">New</a>
+        <a href="#" class="filter-chip {% if current_condition == 'Like New' %}active{% endif %}"
+           hx-get="/search?condition=Like+New" hx-target="#listing-grid" hx-include="[name='q'],[name='category'],[name='sort']">Like New</a>
+        <a href="#" class="filter-chip {% if current_condition == 'Good' %}active{% endif %}"
+           hx-get="/search?condition=Good" hx-target="#listing-grid" hx-include="[name='q'],[name='category'],[name='sort']">Good</a>
+        <a href="#" class="filter-chip {% if current_condition == 'Fair' %}active{% endif %}"
+           hx-get="/search?condition=Fair" hx-target="#listing-grid" hx-include="[name='q'],[name='category'],[name='sort']">Fair</a>
+
+        <h3 class="sidebar-subtitle">Sort</h3>
+        <select name="sort" class="filter-select"
+                hx-get="/search" hx-target="#listing-grid" hx-include="[name='q'],[name='category'],[name='condition']">
+            <option value="" {% if current_sort == '' %}selected{% endif %}>Newest first</option>
+            <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: low → high</option>
+            <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: high → low</option>
+            <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+        </select>
+    </aside>
+
+    <section class="feed">
+        <div id="listing-grid" class="listing-grid">
+            {% for item in listings_with_time %}
+            {% set l = item.0 %}
+            {% set ago = item.1 %}
+            <a href="/listing/{{ l.id }}" class="listing-card">
+                <div class="listing-image">
+                    <img src="{{ l.image_url }}" alt="{{ l.title }}" loading="lazy">
+                    <span class="condition-tag tag-{{ l.condition | lower | replace(from=' ', to='-') }}">{{ l.condition }}</span>
+                </div>
+                <div class="listing-info">
+                    <p class="listing-price">${{ l.price | round(precision=0) }}</p>
+                    <h3 class="listing-title">{{ l.title }}</h3>
+                    <div class="listing-meta">
+                        <span class="listing-location">📍 {{ l.location }}</span>
+                        <span class="listing-time">{{ ago }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+            {% if listings_with_time | length == 0 %}
+            <div class="no-results">
+                <p>No listings yet. Be the first to <a href="/sell">sell something</a>!</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

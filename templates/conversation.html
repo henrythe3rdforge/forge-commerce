@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Chat — {{ other_name }} — Forge Market{% endblock %}
+{% block content %}
+<div class="chat-page">
+    <div class="chat-header">
+        <a href="/messages" class="back-link">← Back</a>
+        <div class="chat-header-info">
+            <h2>{{ other_name }}</h2>
+            {% if listing %}
+            <a href="/listing/{{ listing.id }}" class="chat-listing-link">
+                <img src="{{ listing.image_url }}" alt="{{ listing.title }}" class="chat-listing-thumb">
+                <span>{{ listing.title }} — ${{ listing.price | round(precision=0) }}</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if payment_info %}
+    <div class="payment-banner">
+        <strong>🎉 Offer accepted!</strong> Payment info: <span class="payment-details">{{ payment_info }}</span>
+    </div>
+    {% endif %}
+
+    {% if pending_offer and is_seller %}
+    <div class="offer-banner">
+        <p><strong>💰 Pending offer: ${{ pending_offer.amount | round(precision=2) }}</strong></p>
+        <div class="offer-actions">
+            <a href="/messages/{{ conversation.id }}/offer/{{ pending_offer.id }}/respond?accept=true" class="btn btn-success btn-sm">Accept</a>
+            <a href="/messages/{{ conversation.id }}/offer/{{ pending_offer.id }}/respond?accept=false" class="btn btn-danger btn-sm">Decline</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="chat-messages" id="chat-messages">
+        <div id="existing-messages">
+        {% for msg in messages %}
+        <div class="message-bubble {% if msg.sender_id == user.id %}mine{% else %}theirs{% endif %}">
+            <div class="message-content">{{ msg.content }}</div>
+            <span class="message-time">{{ msg.sender_name }}</span>
+        </div>
+        {% endfor %}
+        </div>
+        <div id="new-messages"></div>
+    </div>
+
+    <!-- HTMX polling for new messages -->
+    <div id="message-poller"
+         hx-get="/messages/{{ conversation.id }}/poll?after={{ last_message_id }}"
+         hx-trigger="every 2s"
+         hx-target="#new-messages"
+         hx-swap="beforeend">
+    </div>
+
+    <div class="chat-input-area">
+        <form method="post" action="/messages/{{ conversation.id }}/send" class="chat-form">
+            <input type="text" name="content" placeholder="Type a message..." autocomplete="off" required autofocus>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+
+        {% if not is_seller and listing and listing.status == "active" %}
+        <form method="post" action="/messages/{{ conversation.id }}/offer" class="offer-form">
+            <input type="number" name="amount" step="0.01" min="1" placeholder="Offer $" required>
+            <button type="submit" class="btn btn-offer">Make Offer</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Auto-scroll to bottom on load
+(function(){
+    var el = document.getElementById('chat-messages');
+    if(el) el.scrollTop = el.scrollHeight;
+    // Also scroll when new messages arrive via HTMX
+    document.body.addEventListener('htmx:afterSwap', function(e){
+        if(e.detail.target && e.detail.target.id === 'new-messages'){
+            el.scrollTop = el.scrollHeight;
+        }
+    });
+})();
+</script>
+{% endblock %}

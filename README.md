@@ -1,77 +1,97 @@
-# 🔨 Forge Commerce
+# ⚒️ Forge Market
 
-E-commerce application built with Rust, HTMX, and SQLite. No JavaScript frameworks, no bloat.
+Peer-to-peer marketplace built with Rust, HTMX, and SQLite. No JavaScript frameworks, no middlemen, no bloat.
+
+Think Facebook Marketplace — but built the right way.
 
 ## Stack
 
 - **Axum 0.8** — async web framework
-- **HTMX 2.0** — hypermedia-driven interactivity
+- **HTMX 2.0** — hypermedia-driven interactivity (live search, message polling)
 - **Tera** — server-side templates
 - **SQLite** — single-file database
-- **Plain CSS** — no preprocessors, no frameworks
+- **Plain CSS** — no preprocessors, no Tailwind, no frameworks
 - **argon2** — password hashing
 
 ## Quick Start
 
 ```bash
-chmod +x start.sh stop.sh status.sh
-./start.sh
+cargo build --release
+PORT=8000 ./target/release/forge-commerce
 ```
 
-Opens on `http://localhost:3000` (or next free port).
+Opens on `http://localhost:8000`.
 
-## Default Admin
+## Demo Accounts
 
-- **Email:** admin@forge.com
-- **Password:** admin123
+All passwords: `password123`
+
+| Account | Email | Location |
+|---------|-------|----------|
+| Alice | alice@example.com | Austin, TX |
+| Bob | bob@example.com | Portland, OR |
+| Clara | clara@example.com | Denver, CO |
 
 ## Features
 
-- Product catalog with search, filtering, sorting
-- Shopping cart with HTMX partial updates
-- Multi-step checkout flow
-- User authentication with session cookies
-- Admin panel with product CRUD and order management
-- Dark/light mode (CSS-only, no JS)
-- Mobile-responsive design
-- Toast notifications for cart actions
+### Marketplace
+- Browse listings with category/condition filters
+- Live HTMX search (no page reload)
+- Sort by price, date
+- Condition tags (New, Like New, Good, Fair)
+- Location-based listings
 
-## Scripts
+### Selling
+- Any user can list items for sale
+- Photo upload, category, condition, location
+- Edit/delete your own listings
+- Mark items as sold
 
-| Script | Purpose |
-|--------|---------|
-| `start.sh` | Build release, download HTMX, find free port, start |
-| `stop.sh` | Graceful shutdown |
-| `status.sh` | Check if running |
+### Messaging
+- Direct buyer-seller chat per listing
+- Real-time message polling (HTMX, 2s interval)
+- Unread message badges
+- Message inbox with conversation list
 
-## API Routes
+### Offers & Payments
+- Buyers submit price offers in-chat
+- Sellers accept/reject offers
+- On acceptance: seller's payment info revealed to buyer
+- Payment info configurable in profile (Venmo, PayPal, Zelle, etc.)
+- Privacy: payment details hidden until offer accepted
+
+### Auth
+- Session-based authentication
+- Argon2 password hashing
+- Editable user profiles (name, location, bio, payment info)
+
+## Routes
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Home page |
-| GET | `/products` | Product catalog |
-| GET | `/products/search` | HTMX search endpoint |
-| GET | `/products/{id}` | Product detail |
-| GET | `/cart` | View cart |
-| POST | `/api/cart/add` | Add to cart |
-| PUT | `/api/cart/{id}` | Update cart item |
-| DELETE | `/api/cart/{id}` | Remove from cart |
-| GET | `/api/cart/count` | Cart count (polling) |
-| POST | `/login` | Login |
-| POST | `/register` | Register |
-| GET | `/checkout` | Checkout flow |
-| GET | `/admin` | Admin dashboard |
+| GET | `/` | Marketplace feed |
+| GET | `/search` | HTMX search partial |
+| GET | `/listing/{id}` | Listing detail |
+| GET/POST | `/sell` | Create listing |
+| POST | `/listing/{id}/edit` | Edit listing |
+| POST | `/listing/{id}/sold` | Mark as sold |
+| GET | `/listing/{id}/contact` | Start conversation |
+| GET | `/messages` | Message inbox |
+| GET | `/messages/{id}` | Conversation view |
+| POST | `/messages/{id}/send` | Send message |
+| POST | `/messages/{id}/offer` | Make offer |
+| GET | `/messages/{id}/poll` | HTMX message polling |
+| GET/POST | `/login` | Login |
+| GET/POST | `/register` | Register |
+| GET/POST | `/profile` | Profile |
 | GET | `/health` | Health check |
 
 ## Development
 
 ```bash
-source ~/.cargo/env
 cargo run
 ```
 
-## Testing
+## Philosophy
 
-```bash
-cargo test
-```
+Every line earns its place. No runtime CDNs, no React, no node_modules. Server renders HTML, HTMX handles interactivity, CSS handles styling. The way it should be.
